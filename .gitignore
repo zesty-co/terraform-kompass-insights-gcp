@@ -33,3 +33,6 @@ backend.tf
 
 .vscode/
 .idea/
+
+# Local billing configuration and state
+/.kompass-billing/

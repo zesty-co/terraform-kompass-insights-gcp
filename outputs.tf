@@ -26,3 +26,13 @@ output "service_account_emails" {
   value       = var.service_account_emails
   depends_on  = [google_project_iam_member.billing_query, google_bigquery_dataset_access.billing_read]
 }
+
+output "expected_export_table" {
+  description = "Expected fully qualified detailed export table, or null without a billing account ID. Does not verify export activation or data availability."
+  value = var.billing_account_id == null ? null : format(
+    "%s.%s.gcp_billing_export_resource_v1_%s",
+    data.google_bigquery_dataset.billing.project,
+    data.google_bigquery_dataset.billing.dataset_id,
+    replace(var.billing_account_id, "-", "_"),
+  )
+}

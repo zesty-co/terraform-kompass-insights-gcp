@@ -5,6 +5,7 @@ output "billing_access" {
     dataset_project_id     = module.kompass_insights.dataset_project_id
     dataset_id             = module.kompass_insights.dataset_id
     dataset_location       = module.kompass_insights.dataset_location
+    expected_export_table  = module.kompass_insights.expected_export_table
     service_account_emails = module.kompass_insights.service_account_emails
   }
 }

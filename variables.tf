@@ -100,3 +100,16 @@ variable "labels" {
     error_message = "Labels can only be set when create_dataset is true."
   }
 }
+
+variable "billing_account_id" {
+  description = "Optional billing account ID used to derive the expected detailed export table name."
+  type        = string
+  default     = null
+
+  validation {
+    condition = var.billing_account_id == null ? true : can(
+      regex("^[A-Z0-9]{6}-[A-Z0-9]{6}-[A-Z0-9]{6}$", var.billing_account_id)
+    )
+    error_message = "billing_account_id must be null or an ID such as 012345-ABCDEF-678901."
+  }
+}

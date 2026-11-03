@@ -78,3 +78,13 @@ run "reject_external_reader_outside_supplied_identities" {
 
   expect_failures = [var.externally_managed_dataset_reader_emails]
 }
+
+run "reject_malformed_billing_account_id" {
+  command = plan
+
+  variables {
+    billing_account_id = "012345_ABCDEF_678901"
+  }
+
+  expect_failures = [var.billing_account_id]
+}

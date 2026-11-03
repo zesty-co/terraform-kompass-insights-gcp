@@ -19,6 +19,7 @@ run "existing_dataset_cross_project_permissions" {
   variables {
     query_project_id   = "example-runtime-project"
     dataset_project_id = "example-billing-project"
+    billing_account_id = "012345-ABCDEF-678901"
   }
 
   override_data {
@@ -72,6 +73,11 @@ run "existing_dataset_cross_project_permissions" {
     condition     = length(google_bigquery_dataset.billing) == 0 && output.dataset_location == "EU"
     error_message = "Referencing an existing dataset must not manage its lifecycle and must report its observed location."
   }
+
+  assert {
+    condition     = output.expected_export_table == "example-billing-project.billing_export.gcp_billing_export_resource_v1_012345_ABCDEF_678901"
+    error_message = "The expected detailed export must identify the billing account in the dataset project, not the query project."
+  }
 }
 
 run "same_project_deduplicates_api_declarations" {
@@ -82,6 +88,11 @@ run "same_project_deduplicates_api_declarations" {
       for service in google_project_service.bigquery : service.project == "example-query-project"
     ])
     error_message = "When the dataset uses the query project, declare the BigQuery API exactly once."
+  }
+
+  assert {
+    condition     = output.expected_export_table == null
+    error_message = "Without a billing account ID, the module must not guess an export table."
   }
 }
 

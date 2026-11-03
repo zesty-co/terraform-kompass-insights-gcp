@@ -54,3 +54,9 @@ variable "labels" {
   default     = {}
   nullable    = false
 }
+
+variable "billing_account_id" {
+  description = "Optional billing account ID used to derive the expected detailed export table name."
+  type        = string
+  default     = null
+}

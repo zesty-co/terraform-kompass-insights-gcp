@@ -6,6 +6,9 @@ on GKE. It uses existing node service accounts from one or more clusters.
 The module grants query-job access and dataset read access. It can also create the dataset.
 You must enable the billing export in Google Cloud Console after the dataset is ready.
 
+Start with the [Terraform onboarding guide](examples/quick-start/README.md).
+It explains how to find each value, assign grant ownership, and pass outputs to Spoke.
+
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
@@ -50,8 +53,9 @@ the GKE workload.
 
 ## Quick Start
 
-Use the local example in [`examples/quick-start/`](examples/quick-start/), or follow the
-installation instructions below.
+Use the [quick-start guide](examples/quick-start/README.md) to find values in Console or with
+read-only commands. Copy its example configuration, fill in your values, and apply Terraform.
+The guide also covers the current checkout's billing-table output and Spoke configuration.
 
 Use one Terraform state for a shared billing destination and its module-managed grants.
 Supply all cluster node identities in `service_account_emails`.
@@ -79,7 +83,7 @@ provider "google" {
 }
 
 module "kompass_insights" {
-  source = "git::https://github.com/zesty-co/terraform-kompass-insights-gcp.git?ref=main"
+  source = "git::https://github.com/zesty-co/terraform-kompass-insights-gcp.git?ref=v1.0.0"
 
   dataset_id = "billing_export"
   service_account_emails = [
@@ -89,7 +93,12 @@ module "kompass_insights" {
 }
 ```
 
-For production, replace `main` with an immutable commit SHA or a release tag.
+This example uses published `v1.0.0` for dataset and grant setup.
+The new billing-account input and expected-table output are not in that release.
+Use the [local quick-start](examples/quick-start/README.md#prerequisites-and-release-status)
+for those features and the new Spoke billing values.
+Public client rollout requires compatible published Terraform, agent, Insights chart, and Spoke
+releases. Pin their actual compatible versions after release.
 
 Before the first apply, identify any existing grants for the supplied accounts.
 Use [external reader ownership](#use-existing-dataset-reader-grants) for existing dataset grants.
@@ -122,8 +131,29 @@ Keep that writer's access. The first export can take time.
 
 The module returns `query_project_id`, `dataset_project_id`, `dataset_id`, `dataset_location`,
 and `service_account_emails`. The location comes from the selected dataset
-([outputs.tf:19](outputs.tf#L19)). These outputs do not supply a table name or show that billing
-data is available.
+([outputs.tf:19](outputs.tf#L19)).
+
+### Expected export table in the current checkout
+
+The following input and output are included in this module source, but not in `v1.0.0`.
+Use the [local example](examples/quick-start/README.md#installation-instructions) to try them.
+Optionally add the intended billing account ID to that module call:
+
+```hcl
+billing_account_id = "012345-ABCDEF-678901"
+```
+
+The `expected_export_table` output identifies the expected detailed export in the dataset project
+([outputs.tf:30](outputs.tf#L30)). For the example dataset, its value is:
+
+```text
+example-billing-project.billing_export.gcp_billing_export_resource_v1_012345_ABCDEF_678901
+```
+
+The output is `null` when `billing_account_id` is omitted. The name is derived from the supplied ID.
+Runtime verification must confirm the intended account, table, and data before the agent uses them.
+The [Spoke values](examples/quick-start/README.md#configure-your-existing-spoke-deployment)
+map these outputs to the agent settings. The billing account ID is not an agent setting.
 
 ## Deployed Resources
 
@@ -272,9 +302,9 @@ make check
 ```
 
 This command checks formatting, validates both modules, runs native mocked tests, and checks
-generated documentation ([Makefile:42](Makefile#L42)). The mocked tests verify the module contract
-only. They do not verify provider-project discovery, live grant preservation, dataset imports,
-or actual billing export.
+generated documentation ([Makefile](Makefile)). The mocked tests verify the module contract only.
+They do not verify provider-project discovery, live grant preservation, dataset imports, or actual
+billing export.
 
 ### Live acceptance
 
@@ -357,6 +387,7 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_billing_account_id"></a> [billing\_account\_id](#input\_billing\_account\_id) | Optional billing account ID used to derive the expected detailed export table name. | `string` | `null` | no |
 | <a name="input_create_dataset"></a> [create\_dataset](#input\_create\_dataset) | Manage the dataset lifecycle. Set false to reference an externally managed dataset. | `bool` | `false` | no |
 | <a name="input_dataset_id"></a> [dataset\_id](#input\_dataset\_id) | ID of the dataset that receives the detailed billing export. | `string` | n/a | yes |
 | <a name="input_dataset_location"></a> [dataset\_location](#input\_dataset\_location) | Billing-export location for a managed dataset. Existing datasets report their actual location. | `string` | `null` | no |
@@ -373,6 +404,7 @@ No modules.
 | <a name="output_dataset_id"></a> [dataset\_id](#output\_dataset\_id) | Selected billing dataset ID. The billing administrator activates detailed export here. |
 | <a name="output_dataset_location"></a> [dataset\_location](#output\_dataset\_location) | Actual location of the billing dataset, for subsequent runtime queries. |
 | <a name="output_dataset_project_id"></a> [dataset\_project\_id](#output\_dataset\_project\_id) | Project that contains the selected billing dataset. |
+| <a name="output_expected_export_table"></a> [expected\_export\_table](#output\_expected\_export\_table) | Expected fully qualified detailed export table, or null without a billing account ID. Does not verify export activation or data availability. |
 | <a name="output_query_project_id"></a> [query\_project\_id](#output\_query\_project\_id) | Project where the supplied identities receive query execution permission. |
 | <a name="output_service_account_emails"></a> [service\_account\_emails](#output\_service\_account\_emails) | Supplied runtime identities. Permission setup does not establish working runtime access. |
 <!-- END_TF_DOCS -->
