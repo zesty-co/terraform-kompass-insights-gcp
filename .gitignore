@@ -1,0 +1,35 @@
+.DS_Store
+
+# Local Terraform providers and dependency locks
+**/.terraform/
+.terraform.lock.hcl
+
+# Local state and plans
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.plan
+tfplan
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Local variable values can contain secrets. Keep *.tfvars.example files visible.
+*.tfvars
+*.tfvars.json
+
+# Local overrides
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Local CLI and backend configuration
+.terraformrc
+terraform.rc
+backend.tf
+*.tfbackend
+
+.vscode/
+.idea/

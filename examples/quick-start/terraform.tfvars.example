@@ -1,0 +1,7 @@
+project_id = "example-billing-project"
+dataset_id = "billing_export"
+
+service_account_emails = [
+  "gke-nodes@cluster-a-project.iam.gserviceaccount.com",
+  "gke-nodes@cluster-b-project.iam.gserviceaccount.com",
+]

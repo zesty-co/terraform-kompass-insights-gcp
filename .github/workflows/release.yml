@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  workflow_run:
+    workflows:
+      - Checks
+    types:
+      - completed
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: >-
+      github.repository == 'zesty-co/terraform-kompass-insights-gcp' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Check that main still matches the tested commit
+        id: revision
+        env:
+          CHECKED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          current_sha="$(git rev-parse HEAD)"
+          if [ "$current_sha" = "$CHECKED_SHA" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Skipping release: main has changed since this check run."
+          fi
+
+      - name: Release
+        if: steps.revision.outputs.current == 'true'
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          semantic_version: 23.0.2
+          extra_plugins: |
+            @semantic-release/changelog@6.0.3
+            @semantic-release/git@10.0.1
+            conventional-changelog-conventionalcommits@7.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
