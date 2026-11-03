@@ -55,7 +55,7 @@ the GKE workload.
 
 Use the [quick-start guide](examples/quick-start/README.md) to find values in Console or with
 read-only commands. Copy its example configuration, fill in your values, and apply Terraform.
-The guide also covers the current checkout's billing-table output and Spoke configuration.
+The guide also covers the billing-table output and Spoke configuration.
 
 Use one Terraform state for a shared billing destination and its module-managed grants.
 Supply all cluster node identities in `service_account_emails`.
@@ -83,9 +83,10 @@ provider "google" {
 }
 
 module "kompass_insights" {
-  source = "git::https://github.com/zesty-co/terraform-kompass-insights-gcp.git?ref=v1.0.0"
+  source = "git::https://github.com/zesty-co/terraform-kompass-insights-gcp.git?ref=v1.1.0"
 
-  dataset_id = "billing_export"
+  dataset_id         = "billing_export"
+  billing_account_id = "012345-ABCDEF-678901"
   service_account_emails = [
     "node-sa@example-cluster-a.iam.gserviceaccount.com",
     "node-sa@example-cluster-b.iam.gserviceaccount.com",
@@ -93,12 +94,13 @@ module "kompass_insights" {
 }
 ```
 
-This example uses published `v1.0.0` for dataset and grant setup.
-The new billing-account input and expected-table output are not in that release.
-Use the [local quick-start](examples/quick-start/README.md#prerequisites-and-release-status)
-for those features and the new Spoke billing values.
-Public client rollout requires compatible published Terraform, agent, Insights chart, and Spoke
-releases. Pin their actual compatible versions after release.
+This example uses published [Terraform `v1.1.0`].
+It includes the billing-account input and expected-table output.
+For Spoke setup, use the [quick-start guide](examples/quick-start/README.md).
+Public client rollout also requires compatible agent, Insights chart, and Spoke releases.
+Pin those versions after release.
+
+[Terraform `v1.1.0`]: https://github.com/zesty-co/terraform-kompass-insights-gcp/releases/tag/v1.1.0
 
 Before the first apply, identify any existing grants for the supplied accounts.
 Use [external reader ownership](#use-existing-dataset-reader-grants) for existing dataset grants.
@@ -133,15 +135,10 @@ The module returns `query_project_id`, `dataset_project_id`, `dataset_id`, `data
 and `service_account_emails`. The location comes from the selected dataset
 ([outputs.tf:19](outputs.tf#L19)).
 
-### Expected export table in the current checkout
+### Expected export table
 
-The following input and output are included in this module source, but not in `v1.0.0`.
-Use the [local example](examples/quick-start/README.md#installation-instructions) to try them.
-Optionally add the intended billing account ID to that module call:
-
-```hcl
-billing_account_id = "012345-ABCDEF-678901"
-```
+Terraform `v1.1.0` includes `billing_account_id` and `expected_export_table`.
+Set `billing_account_id` to the intended account ID, as shown in the module call above.
 
 The `expected_export_table` output identifies the expected detailed export in the dataset project
 ([outputs.tf:30](outputs.tf#L30)). For the example dataset, its value is:

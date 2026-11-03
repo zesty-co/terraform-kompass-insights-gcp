@@ -38,13 +38,12 @@ Otherwise, the dataset project follows the query-project override.
 - Operator permissions from the [module prerequisites](../../README.md#prerequisites).
 - One persistent Terraform state for the shared destination and its module-managed grants.
 
-Terraform `v1.0.0` supports the core dataset and grant setup, but omits the billing-account input
-and expected-table output. This example uses the current local module with `source = "../.."`
-([main.tf:1](main.tf#L1)). Use a revision or release that includes those fields for this flow.
-The new Spoke billing values and GCP agent changes also need compatible published releases.
-Public client rollout requires compatible Terraform and agent releases, followed by Insights and
-Spoke chart releases. After release, pin the actual compatible module tag and chart versions.
-Use compatible checked-out chart and agent code for this local flow.
+Terraform `v1.1.0` includes the billing-account input and expected-table output.
+The [installation example](../../README.md#installation-instructions) uses that published version.
+This example uses the local module with `source = "../.."` ([main.tf:1](main.tf#L1)).
+Use a checkout of `v1.1.0` or a compatible later release for this flow.
+Public client rollout also requires compatible agent, Insights chart, and Spoke releases.
+Use compatible checked-out chart and agent code until those releases are available.
 
 For local discovery, sign in with the Google Cloud CLI:
 
